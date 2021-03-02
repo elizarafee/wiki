@@ -5,7 +5,11 @@
 {% endblock %}
 
 {% block body %}
-    <h1>All Pages</h1>
+    {% if searchResults %}
+        <h1>Did you mean?</h1>
+    {% else %}
+        <h1>All Pages</h1>
+    {% endif %}
 
     <ul>
         {% for entry in entries %}
