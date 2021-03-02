@@ -6,4 +6,9 @@
 
 {% block body %}
     <h1>{{ title }}</h1>
+    {% if markdownContent %}
+        <div>
+            {{ markdownContent}}
+        </div>
+    {% endif %}
 {% endblock %}

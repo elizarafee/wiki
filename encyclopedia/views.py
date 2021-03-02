@@ -2,18 +2,23 @@ from django.shortcuts import render
 from django import forms
 from . import util
 from django.http import HttpResponseRedirect
+from django.http import HttpResponse
 from django.urls import reverse
 
-
 class SearchForm(forms.Form):
-    searchEntry = forms.CharField(label="",widget=forms.TextInput(attrs={'placeholder': 'Search Encyclopedia'}))
+    searchEntry = forms.CharField(label="", widget=forms.TextInput(attrs={'placeholder': 'Search Encyclopedia'}))
 
-def index(request):                                      #"wiki/" + str(searchEntry))) #("{% url 'wiki/{}'.format(searchEntry) %}"))
+class CreateEntryForm(forms.Form):
+    entryTitle = forms.CharField(label="Title:", widget=forms.TextInput(attrs={'placeholder': "Title of the entry's page"}))
+    markdownContent = forms.CharField(label="Markdown Content:", widget=forms.Textarea(attrs={'placeholder': "Write markdown content for this page...",'style': 'height: 200px;width:500px'}))
+
+
+def index(request):                                  
     if request.method == "POST":
-        form = SearchForm(request.POST)
-        if form.is_valid():
+        searchForm = SearchForm(request.POST)
+        if searchForm.is_valid():
             searchResults = []
-            searchEntry = form.cleaned_data["searchEntry"]
+            searchEntry = searchForm.cleaned_data["searchEntry"]
             entries = util.list_entries()
             for entry in entries:
                 if len(searchEntry)!=len(entry) and searchEntry.lower() in entry.lower():
@@ -21,31 +26,49 @@ def index(request):                                      #"wiki/" + str(searchEn
             if searchResults:
                 return render(request, "encyclopedia/index.html", {
                         "entries": searchResults,
-                        "form": form,
+                        "searchForm": searchForm,
                         "searchResults": searchResults
                     }) 
             else:
                 return render(request, "encyclopedia/entry.html", {
-                    "form": form,
+                    "searchForm": searchForm,
                     "title" : util.get_entry(searchEntry)
                 })      
         else:
             return render(request, "encyclopedia/index.html", {
-                "form": form
+                "searchForm": searchForm
             })
 
     return render(request, "encyclopedia/index.html", {
         "entries": util.list_entries(),
-        "form" : SearchForm()
+        "searchForm" : SearchForm()
     })
 
 def entry(request, title):
     return render(request, "encyclopedia/entry.html", {
-        "form" : SearchForm(),
+        "searchForm" : SearchForm(),
         "title" : util.get_entry(title)
     })
 
-def search(request):
-    return render(request, "encyclopedia/entry.html", {
-        "searchEntry" : searchEntry
+def createEntry(request):
+    if request.method == "POST":
+        createEntryform = CreateEntryForm(request.POST)
+        if createEntryform.is_valid():
+            entryTitle = createEntryform.cleaned_data["entryTitle"]
+            markdownContent = createEntryform.cleaned_data["markdownContent"]
+            entries = util.list_entries()
+            for entry in entries:
+                if entryTitle.lower() == entry.lower():
+                    return HttpResponse("ERROR:: Sorry!!! An entry with this title is already available in the entries, so try with another title!")
+           
+            return render(request, 'encyclopedia/entry.html', {
+                    "searchForm" : SearchForm(),
+                    "title": entryTitle,
+                    "markdownContent": markdownContent,
+                    "save_entry" : util.save_entry(entryTitle, markdownContent)
+                })
+
+    return render(request, "encyclopedia/createEntry.html", {
+        "searchForm" : SearchForm(),
+        "createEntryform": CreateEntryForm()
     })
