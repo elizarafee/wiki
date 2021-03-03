@@ -4,6 +4,7 @@ from . import util
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.urls import reverse
+import random
 
 class SearchForm(forms.Form):
     searchEntry = forms.CharField(label="", widget=forms.TextInput(attrs={'placeholder': 'Search Encyclopedia'}))
@@ -48,9 +49,8 @@ def index(request):
 
 def entry(request, title):
     return render(request, "encyclopedia/entry.html", {
-        "title": title,
         "searchForm" : SearchForm(),
-        "entries": util.list_entries(),
+        "title": title,
         "markdown" : util.get_entry(title)
     })
 
@@ -96,4 +96,13 @@ def editEntry(request, title):
         "searchForm" : SearchForm(),
         "editEntryForm": EditEntryForm(),
         "title": title
+    })
+
+def randomEntry(request):
+    entries = util.list_entries()
+    randomEntry = random.choice (entries)
+    return render(request, 'encyclopedia/entry.html', {
+        "searchForm" : SearchForm(),
+        "title": randomEntry,
+        "markdown" : util.get_entry(randomEntry)
     })
