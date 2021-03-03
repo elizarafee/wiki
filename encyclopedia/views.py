@@ -12,6 +12,8 @@ class CreateEntryForm(forms.Form):
     entryTitle = forms.CharField(label="Title:", widget=forms.TextInput(attrs={'placeholder': "Title of the entry's page"}))
     markdownContent = forms.CharField(label="Markdown Content:", widget=forms.Textarea(attrs={'placeholder': "Write markdown content for this page...",'style': 'height: 200px;width:500px'}))
 
+class EditEntryForm(forms.Form):
+    markdownContent = forms.CharField(label="", widget=forms.Textarea(attrs={'placeholder': "Write markdown content for this page..." ,'style': 'height: 200px;width:500px'}))
 
 def index(request):                                  
     if request.method == "POST":
@@ -46,8 +48,10 @@ def index(request):
 
 def entry(request, title):
     return render(request, "encyclopedia/entry.html", {
+        "title": title,
         "searchForm" : SearchForm(),
-        "title" : util.get_entry(title)
+        "entries": util.list_entries(),
+        "markdown" : util.get_entry(title)
     })
 
 def createEntry(request):
@@ -71,4 +75,25 @@ def createEntry(request):
     return render(request, "encyclopedia/createEntry.html", {
         "searchForm" : SearchForm(),
         "createEntryform": CreateEntryForm()
+    })
+
+def editEntry(request, title):
+    if request.method == "POST":
+        editEntryForm = EditEntryForm(request.POST)
+        if editEntryForm.is_valid():
+            markdownContent = editEntryForm.cleaned_data["markdownContent"]
+            return render(request, 'encyclopedia/entry.html', {
+                    "searchForm" : SearchForm(),
+                    "title": title,
+                    "markdownContent": markdownContent,
+                    "save_entry" : util.save_entry(title, markdownContent)
+                })
+        else:
+            return HttpResponse('ERROR:: Sorry! Updating failed..')
+    print("PUT didnt got toouch")
+
+    return render(request, "encyclopedia/editEntry.html", {
+        "searchForm" : SearchForm(),
+        "editEntryForm": EditEntryForm(),
+        "title": title
     })

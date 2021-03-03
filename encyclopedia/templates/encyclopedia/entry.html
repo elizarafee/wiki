@@ -5,10 +5,12 @@
 {% endblock %}
 
 {% block body %}
-    <h1>{{ title }}</h1>
+    <h1> {{ title }} </h1>
+    <h2>{{ markdown }}</h2>
     {% if markdownContent %}
         <div>
             {{ markdownContent}}
         </div>
     {% endif %}
+    <a href="{% url 'encyclopedia:editentry' title %}">Edit Markdown Content</a>
 {% endblock %}
