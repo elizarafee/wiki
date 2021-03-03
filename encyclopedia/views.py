@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.urls import reverse
 import random
+import markdown2
 
 class SearchForm(forms.Form):
     searchEntry = forms.CharField(label="", widget=forms.TextInput(attrs={'placeholder': 'Search Encyclopedia'}))
@@ -51,7 +52,7 @@ def entry(request, title):
     return render(request, "encyclopedia/entry.html", {
         "searchForm" : SearchForm(),
         "title": title,
-        "markdown" : util.get_entry(title)
+        "markdown" : markdown2.markdown(util.get_entry(title))
     })
 
 def createEntry(request):
@@ -85,7 +86,7 @@ def editEntry(request, title):
             return render(request, 'encyclopedia/entry.html', {
                     "searchForm" : SearchForm(),
                     "title": title,
-                    "markdownContent": markdownContent,
+                    "markdownContent": markdown2.markdown(markdownContent),
                     "save_entry" : util.save_entry(title, markdownContent)
                 })
         else:
@@ -104,5 +105,5 @@ def randomEntry(request):
     return render(request, 'encyclopedia/entry.html', {
         "searchForm" : SearchForm(),
         "title": randomEntry,
-        "markdown" : util.get_entry(randomEntry)
+        "markdown" : markdown2.markdown(util.get_entry(randomEntry))
     })
