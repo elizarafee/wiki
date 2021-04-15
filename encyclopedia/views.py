@@ -27,21 +27,31 @@ def index(request):
             for entry in entries:
                 if len(searchEntry)!=len(entry) and searchEntry.lower() in entry.lower():
                     searchResults.append(entry)
-            if searchResults:
-                return render(request, "encyclopedia/index.html", {
-                        "entries": searchResults,
-                        "searchForm": searchForm,
-                        "searchResults": searchResults
-                    }) 
-            else:
-                return render(request, "encyclopedia/entry.html", {
-                    "searchForm": searchForm,
-                    "title" : util.get_entry(searchEntry)
-                })      
-        else:
-            return render(request, "encyclopedia/index.html", {
-                "searchForm": searchForm
-            })
+                    if searchResults:
+                        return render(request, "encyclopedia/index.html", {
+                            "entries": searchResults,
+                            "searchForm": searchForm,
+                            "related_entries": True,
+                        }) 
+            
+            for entry in entries:
+                if len(searchEntry)==len(entry) and searchEntry.lower() in entry.lower():
+                    resultMatched = True
+                    if resultMatched:
+                        return render(request, "encyclopedia/entry.html", {
+                            "searchForm": searchForm,
+                            "title" : util.get_entry(searchEntry)
+                        })
+            
+
+            for entry in entries:
+                if len(searchEntry)!=len(entry) and searchEntry.lower() not in entry.lower():
+                    return render(request, "encyclopedia/error.html", {
+                        "searchForm" : SearchForm(),
+                        "errorMessage" : 'No entry is available of your searched name!'
+                    })
+                    
+            
 
     return render(request, "encyclopedia/index.html", {
         "entries": util.list_entries(),
@@ -49,11 +59,18 @@ def index(request):
     })
 
 def entry(request, title):
-    return render(request, "encyclopedia/entry.html", {
-        "searchForm" : SearchForm(),
-        "title": title,
-        "markdown" : markdown2.markdown(util.get_entry(title))
-    })
+    if title in util.list_entries():
+        return render(request, "encyclopedia/entry.html", {
+            "searchForm" : SearchForm(),
+            "title": title,
+            "markdown" : markdown2.markdown(util.get_entry(title))
+        })
+    else:
+        return render(request, "encyclopedia/error.html", {
+            "searchForm" : SearchForm(),
+            "errorMessage" : 'Sorry your requested page was not found. No entry is available by this name!'
+        })
+    
 
 def createEntry(request):
     if request.method == "POST":
@@ -64,14 +81,18 @@ def createEntry(request):
             entries = util.list_entries()
             for entry in entries:
                 if entryTitle.lower() == entry.lower():
-                    return HttpResponse("ERROR:: Sorry!!! An entry with this title is already available in the entries, so try with another title!")
-           
+                    return render(request, "encyclopedia/error.html", {
+                        "searchForm" : SearchForm(),
+                        "errorMessage" : "ERROR:: Sorry!!! An entry with this title is already available in the entries, so try with another title!"
+                    })
+                    
+                    
             return render(request, 'encyclopedia/entry.html', {
-                    "searchForm" : SearchForm(),
-                    "title": entryTitle,
-                    "markdownContent": markdownContent,
-                    "save_entry" : util.save_entry(entryTitle, markdownContent)
-                })
+                "searchForm" : SearchForm(),
+                "title": entryTitle,
+                "markdownContent": markdownContent,
+                "save_entry" : util.save_entry(entryTitle, markdownContent)
+            })
 
     return render(request, "encyclopedia/createEntry.html", {
         "searchForm" : SearchForm(),
@@ -91,12 +112,12 @@ def editEntry(request, title):
                 })
         else:
             return HttpResponse('ERROR:: Sorry! Updating failed..')
-    print("PUT didnt got toouch")
 
     return render(request, "encyclopedia/editEntry.html", {
         "searchForm" : SearchForm(),
         "editEntryForm": EditEntryForm(),
-        "title": title
+        "title": title,
+        "markdownContent": util.get_entry(title)
     })
 
 def randomEntry(request):

@@ -7,9 +7,6 @@
     <form action="{% url 'encyclopedia:editentry' title %}" method="POST">
         {% csrf_token %}    
         <div>
-            {{ editEntryForm.entryTitle }}
-        </div>
-        <div>
             {{ editEntryForm.markdownContent }}
         </div>
         <input type="submit" value="Update"/>

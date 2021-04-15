@@ -15,7 +15,7 @@
                 <form action="{% url 'encyclopedia:index' %}" method="POST">
                     {% csrf_token %}
                     {{ searchForm }}
-                    <input type="submit" placeholder="Search"/>
+                    <input type="submit" placeholder="Search" value="Search"/>
                 </form>
                 <div>
                     <a href="{% url 'encyclopedia:index' %}">Home</a>

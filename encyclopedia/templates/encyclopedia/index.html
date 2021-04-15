@@ -1,19 +1,26 @@
 {% extends "encyclopedia/layout.html" %}
-
 {% block title %}
-    Encyclopedia
+Encyclopedia
 {% endblock %}
 
 {% block body %}
-    {% if searchResults %}
-        <h1>Did you mean?</h1>
-    {% else %}
-        <h1>All Pages</h1>
-    {% endif %}
+{% if related_entries %}
+<h1>Did you mean?</h1>
+{% elif errorMessage %}
+<div class="alert alert-danger" role="alert">
+    {{ errorMessage }}
+</div>
+{% else %}
+<h1>All Pages</h1>
+{% endif %}
 
-    <ul>
-        {% for entry in entries %}
-            <a href="{% url 'encyclopedia:entry' entry %}"><li>{{ entry }}</li></a>
-        {% endfor %}
-    </ul>
+<ul>
+    {% if entries %}
+    {% for entry in entries %}
+    <a href="{% url 'encyclopedia:entry' entry %}">
+        <li>{{ entry }}</li>
+    </a>
+    {% endfor %}
+    {% endif %}
+</ul>
 {% endblock %}
