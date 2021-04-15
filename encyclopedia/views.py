@@ -11,11 +11,11 @@ class SearchForm(forms.Form):
     searchEntry = forms.CharField(label="", widget=forms.TextInput(attrs={'placeholder': 'Search Encyclopedia'}))
 
 class CreateEntryForm(forms.Form):
-    entryTitle = forms.CharField(label="Title:", widget=forms.TextInput(attrs={'placeholder': "Title of the entry's page"}))
-    markdownContent = forms.CharField(label="Markdown Content:", widget=forms.Textarea(attrs={'placeholder': "Write markdown content for this page...",'style': 'height: 200px;width:500px'}))
+    entryTitle = forms.CharField(label="Title:", widget=forms.TextInput(attrs={'placeholder': "Title"}))
+    markdownContent = forms.CharField(label="Markdown Content:", widget=forms.Textarea(attrs={'placeholder': "Markdown content for this page...",'style': 'height: 200px;width:500px'}))
 
 class EditEntryForm(forms.Form):
-    markdownContent = forms.CharField(label="", widget=forms.Textarea(attrs={'placeholder': "Write markdown content for this page..." ,'style': 'height: 200px;width:500px'}))
+    markdownContent = forms.CharField(label="", widget=forms.Textarea(attrs={'placeholder': "Markdown content for this page..." ,'style': 'height: 200px;width:500px'}))
 
 def index(request):                                  
     if request.method == "POST":
@@ -27,20 +27,24 @@ def index(request):
             for entry in entries:
                 if len(searchEntry)!=len(entry) and searchEntry.lower() in entry.lower():
                     searchResults.append(entry)
-                    if searchResults:
-                        return render(request, "encyclopedia/index.html", {
-                            "entries": searchResults,
-                            "searchForm": searchForm,
-                            "related_entries": True,
-                        }) 
+            
+            if searchResults:
+                return render(request, "encyclopedia/index.html", {
+                    "entries": searchResults,
+                    "searchForm": searchForm,
+                    "related_entries": True
+                }) 
             
             for entry in entries:
                 if len(searchEntry)==len(entry) and searchEntry.lower() in entry.lower():
                     resultMatched = True
                     if resultMatched:
                         return render(request, "encyclopedia/entry.html", {
+                            "entries": searchEntry,
                             "searchForm": searchForm,
-                            "title" : util.get_entry(searchEntry)
+                            "title" : util.get_entry(searchEntry),
+                            "title": entry,
+                            "markdown" : markdown2.markdown(util.get_entry(entry))
                         })
             
 
