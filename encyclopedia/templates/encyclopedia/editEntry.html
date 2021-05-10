@@ -1,14 +1,16 @@
 {% extends "encyclopedia/layout.html" %}
 
-
-
 {% block body %}
-    <h1>Edit the Markdown of {{ title }}</h1>
-    <form action="{% url 'encyclopedia:editentry' title %}" method="POST">
-        {% csrf_token %}    
-        <div>
-            {{ editEntryForm.markdownContent }}
-        </div>
-        <input type="submit" value="Update"/>
-    </form>
+<h1>Edit the Markdown content of {{ title }}</h1>
+<form action="{% url 'encyclopedia:editentry' title %}" method="POST">
+    {% csrf_token %}
+    {{ editEntryForm }}
+    <br>
+    <small>Here is the prepopulated value. You can copy it to your textarea field for editting in case!</small>
+    <br>
+    <small> <strong>Old Content: </strong> <em>{{ markdownContent }}</em></small>
+    <br>
+    <!-- <textarea name="markdown" style="height: 200px; width: 500px">{{ markdownContent }}</textarea> -->
+    <input type="submit" value="Update" />
+</form>
 {% endblock %}

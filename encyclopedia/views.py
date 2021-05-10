@@ -15,7 +15,7 @@ class CreateEntryForm(forms.Form):
     markdownContent = forms.CharField(label="Markdown Content:", widget=forms.Textarea(attrs={'placeholder': "Markdown content for this page...",'style': 'height: 200px;width:500px'}))
 
 class EditEntryForm(forms.Form):
-    markdownContent = forms.CharField(label="", widget=forms.Textarea(attrs={'placeholder': "Markdown content for this page..." ,'style': 'height: 200px;width:500px'}))
+    markdownContent = forms.CharField(label="", required=False, widget=forms.Textarea(attrs={'style': 'height: 200px;width:500px'}))
 
 def index(request):                                  
     if request.method == "POST":
@@ -111,15 +111,19 @@ def editEntry(request, title):
             return render(request, 'encyclopedia/entry.html', {
                     "searchForm" : SearchForm(),
                     "title": title,
-                    "markdownContent": markdown2.markdown(markdownContent),
+                    "markdown": markdown2.markdown(markdownContent),
                     "save_entry" : util.save_entry(title, markdownContent)
                 })
         else:
-            return HttpResponse('ERROR:: Sorry! Updating failed..')
-
+            return render(request, "encyclopedia/error.html", {
+                    "searchForm" : SearchForm(),
+                    "errorMessage" : 'ERROR:: Sorry! Updating failed..'
+                })
+    
+    editEntryForm = EditEntryForm(request.GET, initial={'markdownContent': markdown2.markdown(util.get_entry(title))})
     return render(request, "encyclopedia/editEntry.html", {
         "searchForm" : SearchForm(),
-        "editEntryForm": EditEntryForm(),
+        'editEntryForm' : editEntryForm,
         "title": title,
         "markdownContent": util.get_entry(title)
     })
